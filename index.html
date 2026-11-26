@@ -7,506 +7,356 @@
 <title>5-Year Subscription Leak Calculator</title>
 <style>
 :root {
-  --bg:#08090d;
-  --panel:#11131b;
-  --panel2:#171a24;
-  --text:#f5f6fa;
-  --muted:#9298a8;
-  --red:#ff4058;
+  --bg:#08090d;--panel:#11131b;--panel2:#191c27;
+  --text:#f5f6fa;--muted:#9298a8;--red:#ff4058;
   --border:#292d3a;
 }
-* { box-sizing:border-box; }
-body {
-  margin:0;
-  background:
-    radial-gradient(ellipse at 50% -15%,#30202b 0%,transparent 48%),
-    var(--bg);
-  color:var(--text);
-  font-family:Inter,Arial,sans-serif;
+*{box-sizing:border-box}
+body{
+ margin:0;background:radial-gradient(ellipse at 50% -15%,#30202b,transparent 48%),var(--bg);
+ color:var(--text);font-family:Inter,Arial,sans-serif
 }
-.container {
-  width:min(1080px,92%);
-  margin:45px auto;
+.container{width:min(1100px,92%);margin:40px auto}
+header{text-align:center;margin-bottom:35px}
+.eyebrow{color:var(--red);font-size:12px;font-weight:800;letter-spacing:3px}
+h1{font-size:clamp(30px,5vw,54px);line-height:1.08;margin:14px 0;letter-spacing:-2px}
+h1 span{color:var(--red)}
+.subtitle{color:var(--muted);line-height:1.6;max-width:620px;margin:auto}
+.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;align-items:start}
+.panel{
+ background:linear-gradient(145deg,#151823,#0f1118);
+ border:1px solid var(--border);border-radius:18px;padding:22px;
+ box-shadow:0 15px 45px #0005;margin-bottom:20px
 }
-header { text-align:center; margin-bottom:35px; }
-.eyebrow {
-  color:var(--red);
-  font-size:12px;
-  font-weight:800;
-  letter-spacing:3px;
+.panel h2{font-size:18px;margin:0 0 8px}
+.hint{color:var(--muted);font-size:13px;line-height:1.5;margin-bottom:20px}
+.currency-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}
+.currency-row select{width:110px}
+label{display:block;color:var(--muted);font-size:11px;margin-bottom:6px}
+input,select{
+ width:100%;min-width:0;background:#0c0e14;color:var(--text);
+ border:1px solid #333849;border-radius:8px;padding:11px 9px;
+ outline:none;font-size:14px
 }
-h1 {
-  font-size:clamp(30px,5vw,54px);
-  line-height:1.08;
-  margin:14px 0;
-  letter-spacing:-2px;
+input:focus,select:focus{border-color:var(--red)}
+.subscription{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px}
+.fields{display:grid;grid-template-columns:1.3fr .8fr .8fr;gap:9px}
+.extra{display:grid;grid-template-columns:1fr 1fr auto;gap:9px;margin-top:12px;align-items:end}
+button{cursor:pointer;font-weight:700;border-radius:9px;padding:12px 16px}
+button:hover{filter:brightness(1.13)}
+.remove{background:transparent;border:1px solid #51303a;color:#ff7c8c}
+.add{background:#242835;border:1px solid #3a4051;color:white;width:100%;margin-top:5px}
+.calculate{background:var(--red);color:white;border:0;width:100%;margin-top:12px;box-shadow:0 5px 25px #ff405833}
+.result-label{color:var(--muted);font-size:12px;letter-spacing:1.5px;font-weight:700}
+.big-total{font-size:clamp(34px,5vw,48px);font-weight:850;color:var(--red);margin:8px 0 20px;overflow-wrap:anywhere}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:#0b0d13;padding:14px;border-radius:11px;border:1px solid var(--border)}
+.stat small{color:var(--muted);display:block;margin-bottom:7px}
+.stat strong{font-size:19px}
+.chart-wrap{display:flex;justify-content:center;align-items:center;margin:28px auto 20px}
+.pie{width:min(230px,65vw);aspect-ratio:1;border-radius:50%;background:conic-gradient(#303545 0deg 360deg);position:relative;transition:background .5s}
+.pie::after{
+ content:"5 YEAR COST";position:absolute;inset:27%;border-radius:50%;
+ background:#11131b;display:flex;align-items:center;justify-content:center;
+ color:var(--muted);font-size:11px;font-weight:800;letter-spacing:1px
 }
-h1 span { color:var(--red); }
-.subtitle {
-  color:var(--muted);
-  line-height:1.6;
-  max-width:600px;
-  margin:auto;
+.legend{display:grid;gap:10px}
+.legend-item{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:#d8dbe4}
+.legend-name{display:flex;align-items:center;gap:8px}
+.dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.empty{color:var(--muted);text-align:center;font-size:13px;padding:10px}
+.note{color:var(--muted);font-size:11px;line-height:1.6;margin-top:20px}
+
+/* WHAT COULD YOU BUY */
+.buy-panel{overflow:hidden;position:relative}
+.buy-panel::before{
+ content:"";position:absolute;top:-100px;right:-100px;width:240px;height:240px;
+ background:#ff405815;filter:blur(65px);pointer-events:none
 }
-.grid {
-  display:grid;
-  grid-template-columns:1.1fr .9fr;
-  gap:20px;
-  align-items:start;
-}
-.panel {
-  background:linear-gradient(145deg,#151823,#0f1118);
-  border:1px solid var(--border);
-  border-radius:18px;
-  padding:22px;
-  box-shadow:0 15px 45px #0005;
-}
-.panel h2 { font-size:18px; margin:0 0 8px; }
-.hint { color:var(--muted); font-size:13px; margin-bottom:20px; }
-.subscription {
-  background:var(--panel2);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:14px;
-  margin-bottom:12px;
-}
-.fields {
-  display:grid;
-  grid-template-columns:1.3fr .8fr .8fr;
-  gap:9px;
-}
-label {
-  display:block;
-  color:var(--muted);
-  font-size:11px;
-  margin-bottom:6px;
-}
-input,select {
-  width:100%;
-  min-width:0;
-  background:#0c0e14;
-  color:var(--text);
-  border:1px solid #333849;
-  border-radius:8px;
-  padding:11px 9px;
-  outline:none;
-  font-size:14px;
-}
-input:focus,select:focus { border-color:var(--red); }
-.extra {
-  display:grid;
-  grid-template-columns:1fr 1fr auto;
-  gap:9px;
-  margin-top:12px;
-  align-items:end;
-}
-.remove {
-  background:transparent;
-  border:1px solid #51303a;
-  color:#ff7c8c;
-  border-radius:8px;
-  padding:10px;
-  cursor:pointer;
-}
-button {
-  cursor:pointer;
-  font-weight:700;
-  border-radius:9px;
-  padding:12px 16px;
-}
-.add {
-  background:#242835;
-  border:1px solid #3a4051;
-  color:white;
-  width:100%;
-  margin-top:5px;
-}
-.calculate {
-  background:var(--red);
-  color:white;
-  border:0;
-  width:100%;
-  margin-top:12px;
-  box-shadow:0 5px 25px #ff405833;
-}
-button:hover { filter:brightness(1.13); }
-.currency-row {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin-bottom:18px;
-}
-.currency-row select { width:110px; }
-.result-label {
-  color:var(--muted);
-  font-size:12px;
-  letter-spacing:1.5px;
-  font-weight:700;
-}
-.big-total {
-  font-size:clamp(34px,5vw,48px);
-  font-weight:850;
-  color:var(--red);
-  margin:8px 0 20px;
-  overflow-wrap:anywhere;
-}
-.stats {
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-}
-.stat {
-  background:#0b0d13;
-  padding:14px;
-  border-radius:11px;
-  border:1px solid var(--border);
-}
-.stat small { color:var(--muted); display:block; margin-bottom:7px; }
-.stat strong { font-size:19px; }
-.chart-wrap {
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  margin:28px auto 20px;
-}
-.pie {
-  width:min(240px,65vw);
-  aspect-ratio:1;
-  border-radius:50%;
-  background:conic-gradient(#303545 0deg 360deg);
-  position:relative;
-  transition:background .5s ease;
-}
-.pie::after {
-  content:"5 YEAR COST";
-  position:absolute;
-  inset:27%;
-  border-radius:50%;
-  background:#11131b;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:var(--muted);
-  font-size:11px;
-  font-weight:800;
-  letter-spacing:1px;
-}
-.legend { display:grid; gap:10px; }
-.legend-item {
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-  font-size:13px;
-  color:#d8dbe4;
-}
-.legend-name { display:flex; align-items:center; gap:8px; }
-.dot {
-  width:10px;
-  height:10px;
-  border-radius:3px;
-  flex-shrink:0;
-}
-.empty {
-  color:var(--muted);
-  text-align:center;
-  font-size:13px;
-  padding:10px;
-}
-.note {
-  color:var(--muted);
-  font-size:11px;
-  line-height:1.6;
-  margin-top:20px;
-}
-footer {
-  color:#777e8f;
-  font-size:12px;
-  text-align:center;
-  margin:25px 0;
-}
-@media(max-width:760px) {
-  .grid { grid-template-columns:1fr; }
-  .container { margin:25px auto; }
-}
-@media(max-width:440px) {
-  .fields { grid-template-columns:1fr 1fr; }
-  .fields > div:first-child { grid-column:1/-1; }
-  .extra { grid-template-columns:1fr 1fr; }
-  .remove { grid-column:1/-1; }
-  .panel { padding:16px; }
+.buy-kicker{color:var(--red);font-size:11px;font-weight:800;letter-spacing:2px}
+.buy-total{font-size:clamp(30px,5vw,44px);font-weight:850;margin:12px 0 5px;overflow-wrap:anywhere}
+.buy-description{color:var(--muted);font-size:13px;line-height:1.6}
+.progress-track{height:9px;background:#292d3a;border-radius:20px;overflow:hidden;margin:19px 0 8px}
+.progress-fill{height:100%;width:0;background:linear-gradient(90deg,#ff4058,#ff9c42);border-radius:20px;transition:width .6s}
+.progress-labels{display:flex;justify-content:space-between;color:var(--muted);font-size:11px}
+.tier-card{background:#0b0d13;border:1px solid #353949;border-radius:14px;padding:18px;margin-top:20px}
+.tier-tag{color:#ff9c42;font-size:11px;letter-spacing:1.5px;font-weight:800}
+.tier-title{font-size:21px;font-weight:800;margin:8px 0}
+.tier-range{font-size:12px;color:var(--muted)}
+.buy-examples{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:17px}
+.buy-example{background:#171a24;border:1px solid #292d3a;border-radius:10px;padding:13px;font-size:13px;line-height:1.5}
+.buy-example span{display:block;font-size:19px;margin-bottom:7px}
+.next-tier{margin-top:15px;color:var(--muted);font-size:12px;line-height:1.6}
+.range-list{margin-top:22px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.range-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px;background:#0b0d13;border:1px solid var(--border);border-radius:9px;font-size:11px;color:var(--muted)}
+.range-row.active{border-color:var(--red);background:#ff405812;color:white}
+.range-row strong{color:inherit;font-size:11px}
+footer{color:#777e8f;font-size:12px;text-align:center;margin:25px 0}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.container{margin:25px auto}}
+@media(max-width:440px){
+ .fields{grid-template-columns:1fr 1fr}
+ .fields>div:first-child{grid-column:1/-1}
+ .extra{grid-template-columns:1fr 1fr}
+ .remove{grid-column:1/-1}
+ .panel{padding:16px}
+ .buy-examples,.range-list{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
 <div class="container">
-  <header>
-    <div class="eyebrow">WORLD.EXE PRESENTS</div>
-    <h1>THE 5-YEAR <span>SUBSCRIPTION</span> LEAK</h1>
-    <p class="subtitle">
-      Those tiny recurring payments can add up.
-      Enter your subscriptions and discover what they could cost
-      over the next five years.
-    </p>
-  </header>
+<header>
+ <div class="eyebrow">WORLD.EXE PRESENTS</div>
+ <h1>THE 5-YEAR <span>SUBSCRIPTION</span> LEAK</h1>
+ <p class="subtitle">Those tiny recurring payments can add up. Discover what your subscriptions could cost over five years — and what else that money could buy.</p>
+</header>
 
-  <div class="grid">
-    <section class="panel">
-      <div class="currency-row">
-        <div>
-          <h2>Your subscriptions</h2>
-          <div class="hint">Add the services you currently pay for.</div>
-        </div>
-        <div>
-          <label for="currency">Currency</label>
-          <select id="currency">
-            <option value="USD">USD ($)</option>
-            <option value="GBP">GBP (£)</option>
-            <option value="EUR">EUR (€)</option>
-            <option value="INR">INR (₹)</option>
-            <option value="CAD">CAD ($)</option>
-            <option value="AUD">AUD ($)</option>
-          </select>
-        </div>
-      </div>
-
-      <div id="subscriptions"></div>
-      <button class="add" id="addButton">+ Add another subscription</button>
-      <button class="calculate" id="calculateButton">
-        CALCULATE MY 5-YEAR COST →
-      </button>
-      <p class="note">
-        Extra months represent payments you might make after deciding
-        you want to cancel. Enter zero if this does not apply.
-      </p>
-    </section>
-
-    <section class="panel">
-      <div class="result-label">YOUR PROJECTED 5-YEAR SPENDING</div>
-      <div class="big-total" id="fiveYear">$0.00</div>
-
-      <div class="stats">
-        <div class="stat">
-          <small>Monthly spending</small>
-          <strong id="monthly">$0</strong>
-        </div>
-        <div class="stat">
-          <small>Annual spending</small>
-          <strong id="annual">$0</strong>
-        </div>
-        <div class="stat">
-          <small>Extra cancellation cost</small>
-          <strong id="leak">$0</strong>
-        </div>
-        <div class="stat">
-          <small>Number of subscriptions</small>
-          <strong id="count">0</strong>
-        </div>
-      </div>
-
-      <h2 style="margin-top:28px">Where your money goes</h2>
-      <div class="hint">Five-year cost by subscription.</div>
-
-      <div class="chart-wrap">
-        <div class="pie" id="pie"></div>
-      </div>
-      <div class="legend" id="legend">
-        <div class="empty">Add subscriptions to see your breakdown.</div>
-      </div>
-      <p class="note">
-        Estimates assume subscription prices remain unchanged.
-        Annual billing is converted to an average monthly cost.
-        Taxes, price increases and investment opportunity costs are
-        not included.
-      </p>
-    </section>
+<div class="grid">
+<section class="panel">
+ <div class="currency-row">
+  <div>
+   <h2>Your subscriptions</h2>
+   <div class="hint">Add the services you currently pay for.</div>
   </div>
+  <div>
+   <label for="currency">CURRENCY</label>
+   <select id="currency">
+    <option value="USD">USD ($)</option>
+    <option value="GBP">GBP (£)</option>
+    <option value="EUR">EUR (€)</option>
+    <option value="INR">INR (₹)</option>
+    <option value="CAD">CAD ($)</option>
+    <option value="AUD">AUD ($)</option>
+   </select>
+  </div>
+ </div>
+ <div id="subscriptions"></div>
+ <button class="add" id="addButton">+ Add another subscription</button>
+ <button class="calculate" id="calculateButton">CALCULATE MY 5-YEAR COST →</button>
+ <p class="note">Extra months represent payments you might make after deciding you want to cancel. Enter zero if this does not apply.</p>
+</section>
 
-  <footer>
-    WORLD.EXE · QUESTION EVERYTHING
-  </footer>
+<div>
+<section class="panel">
+ <div class="result-label">YOUR PROJECTED 5-YEAR SPENDING</div>
+ <div class="big-total" id="fiveYear">$0</div>
+ <div class="stats">
+  <div class="stat"><small>Monthly spending</small><strong id="monthly">$0</strong></div>
+  <div class="stat"><small>Annual spending</small><strong id="annual">$0</strong></div>
+  <div class="stat"><small>Extra cancellation cost</small><strong id="leak">$0</strong></div>
+  <div class="stat"><small>Subscriptions</small><strong id="count">0</strong></div>
+ </div>
+ <h2 style="margin-top:28px">Where your money goes</h2>
+ <div class="hint">Five-year cost by subscription.</div>
+ <div class="chart-wrap"><div class="pie" id="pie"></div></div>
+ <div class="legend" id="legend"><div class="empty">Add subscriptions to see your breakdown.</div></div>
+ <p class="note">Estimates assume prices remain unchanged. Annual billing is converted to an average monthly cost.</p>
+</section>
+
+<section class="panel buy-panel">
+ <div class="buy-kicker">THINK ABOUT THE ALTERNATIVE</div>
+ <h2 style="font-size:24px;margin-top:9px">What could you buy instead?</h2>
+ <div class="buy-total" id="buyTotal">$0</div>
+ <div class="buy-description" id="buyDescription">Your five-year subscription spending could pay for something else. Add your subscriptions to find out.</div>
+ <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+ <div class="progress-labels">
+  <span id="lowerLabel">$0</span>
+  <span id="upperLabel">$10</span>
+ </div>
+ <div class="tier-card">
+  <div class="tier-tag" id="tierTag">YOUR SPENDING RANGE</div>
+  <div class="tier-title" id="tierTitle">Add your subscriptions</div>
+  <div class="tier-range" id="tierRange">Your purchase examples will appear here.</div>
+  <div class="buy-examples" id="buyExamples">
+   <div class="buy-example"><span>🛍️</span>Add subscriptions to unlock examples.</div>
+  </div>
+  <div class="next-tier" id="nextTier"></div>
+ </div>
+ <h2 style="margin-top:25px">The spending scale</h2>
+ <div class="hint">Your result is compared against these equivalent USD spending ranges, converted into your selected currency.</div>
+ <div class="range-list" id="rangeList"></div>
+ <p class="note">Purchase examples are illustrative, not live product prices. Actual costs vary by country, taxes and retailer.</p>
+</section>
+</div>
+</div>
+
+<footer>WORLD.EXE · QUESTION EVERYTHING</footer>
 </div>
 
 <script>
-const colors = [
-  "#ff4058","#ff9c42","#f7d154","#5bd6b0",
-  "#55a7ff","#a98bff","#ed78c6","#9ca8bb",
-  "#6fdbed","#b1dc6c"
+const colors=["#ff4058","#ff9c42","#f7d154","#5bd6b0","#55a7ff","#a98bff","#ed78c6","#9ca8bb","#6fdbed","#b1dc6c"];
+
+/* Approximate conversion rates: units of selected currency per 1 USD.
+   Update these values periodically if you publish the tool. */
+const fx={
+ USD:1, GBP:0.79, EUR:0.92, INR:84,
+ CAD:1.37, AUD:1.53
+};
+
+const symbols={USD:"$",GBP:"£",EUR:"€",INR:"₹",CAD:"CA$",AUD:"A$"};
+const tiers=[
+ {min:0,max:10,title:"A small everyday treat",items:[["☕","A few coffees"],["🍫","Snacks or treats"]]},
+ {min:10,max:50,title:"A little upgrade",items:[["🍔","A nice meal out"],["🎬","A movie night with snacks"]]},
+ {min:50,max:100,title:"A useful everyday purchase",items:[["🎧","Budget wireless earbuds"],["📚","Several books"]]},
+ {min:100,max:250,title:"A worthwhile upgrade",items:[["👟","A pair of quality shoes"],["🎮","A few new games"]]},
+ {min:250,max:500,title:"A bigger purchase",items:[["🎧","Premium headphones"],["🪑","A comfortable desk chair"]]},
+ {min:500,max:1000,title:"A serious upgrade",items:[["📱","A budget smartphone"],["✈️","Part of a short trip"]]},
+ {min:1000,max:2500,title:"A major purchase",items:[["💻","A capable laptop"],["🚲","A quality bicycle"]]},
+ {min:2500,max:5000,title:"A major lifestyle upgrade",items:[["🖥️","A powerful desktop setup"],["✈️","A memorable holiday"]]},
+ {min:5000,max:10000,title:"A substantial investment",items:[["🚗","A significant car down payment"],["🎓","Part of a course or education"]]},
+ {min:10000,max:25000,title:"A life-changing amount",items:[["🚙","A used car, depending on market"],["🏠","A substantial home deposit"]]},
+ {min:25000,max:50000,title:"A serious financial milestone",items:[["🏡","A large home deposit"],["📈","A substantial long-term savings fund"]]},
+ {min:50000,max:100000,title:"A six-figure milestone",items:[["🏠","A major property contribution"],["💼","A substantial business or savings fund"]]}
 ];
 
-const container = document.getElementById("subscriptions");
-const currencySelect = document.getElementById("currency");
+const container=document.getElementById("subscriptions");
+const currencySelect=document.getElementById("currency");
+let nextId=0;
 
-let nextId = 0;
-
-function addSubscription(name = "", price = "", billing = "monthly", delay = 0) {
-  const id = ++nextId;
-  const card = document.createElement("div");
-  card.className = "subscription";
-  card.dataset.id = id;
-
-  card.innerHTML = `
-    <div class="fields">
-      <div>
-        <label>SUBSCRIPTION NAME</label>
-        <input class="service-name" placeholder="e.g. Streaming" value="${escapeAttr(name)}">
-      </div>
-      <div>
-        <label>PRICE</label>
-        <input class="price" type="number" min="0" step="0.01"
-          placeholder="0.00" value="${escapeAttr(price)}">
-      </div>
-      <div>
-        <label>BILLING</label>
-        <select class="billing">
-          <option value="monthly" ${billing === "monthly" ? "selected" : ""}>Monthly</option>
-          <option value="annual" ${billing === "annual" ? "selected" : ""}>Annual</option>
-        </select>
-      </div>
-    </div>
-    <div class="extra">
-      <div>
-        <label>EXTRA MONTHS AFTER WANTING TO CANCEL</label>
-        <input class="delay" type="number" min="0" max="60" step="1"
-          value="${Number(delay) || 0}">
-      </div>
-      <div>
-        <label>EXTRA COST</label>
-        <input class="extra-cost" value="0" readonly>
-      </div>
-      <button class="remove" type="button">Remove</button>
-    </div>
-  `;
-
-  card.querySelector(".remove").addEventListener("click", () => {
-    card.remove();
-    calculate();
-  });
-
-  card.querySelectorAll("input,select").forEach(el => {
-    el.addEventListener("input", calculate);
-    el.addEventListener("change", calculate);
-  });
-
-  container.appendChild(card);
-  calculate();
+function escapeHTML(s){
+ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
-
-function escapeAttr(value) {
-  return String(value).replace(/[&"'<>]/g, char => ({
-    "&":"&amp;", '"':"&quot;", "'":"&#39;",
-    "<":"&lt;", ">":"&gt;"
-  })[char]);
+function addSubscription(name="",price="",billing="monthly",delay=0){
+ const card=document.createElement("div");
+ card.className="subscription";
+ card.innerHTML=`
+ <div class="fields">
+  <div><label>SUBSCRIPTION NAME</label><input class="service-name" placeholder="e.g. Streaming" value="${escapeHTML(name)}"></div>
+  <div><label>PRICE</label><input class="price" type="number" min="0" step="0.01" placeholder="0.00" value="${escapeHTML(price)}"></div>
+  <div><label>BILLING</label><select class="billing"><option value="monthly" ${billing==="monthly"?"selected":""}>Monthly</option><option value="annual" ${billing==="annual"?"selected":""}>Annual</option></select></div>
+ </div>
+ <div class="extra">
+  <div><label>EXTRA MONTHS AFTER WANTING TO CANCEL</label><input class="delay" type="number" min="0" max="60" step="1" value="${delay}"></div>
+  <div><label>EXTRA COST</label><input class="extra-cost" value="0" readonly></div>
+  <button class="remove" type="button">Remove</button>
+ </div>`;
+ card.querySelector(".remove").onclick=()=>{card.remove();calculate()};
+ card.querySelectorAll("input,select").forEach(el=>{
+  el.addEventListener("input",calculate);
+  el.addEventListener("change",calculate);
+ });
+ container.appendChild(card);
+ calculate();
 }
-
-function money(value) {
-  const currency = currencySelect.value;
-  try {
-    return new Intl.NumberFormat(undefined, {
-      style:"currency",
-      currency,
-      maximumFractionDigits:2
-    }).format(value);
-  } catch {
-    return value.toFixed(2);
-  }
+function money(value){
+ const currency=currencySelect.value;
+ try{return new Intl.NumberFormat(undefined,{style:"currency",currency,maximumFractionDigits:2}).format(value)}
+ catch{return symbols[currency]+value.toFixed(2)}
 }
-
-function calculate() {
-  const cards = [...container.querySelectorAll(".subscription")];
-  const entries = [];
-  let monthlyTotal = 0;
-  let delayTotal = 0;
-
-  cards.forEach((card, index) => {
-    const name = card.querySelector(".service-name").value.trim()
-      || `Subscription ${index + 1}`;
-    const price = Math.max(0, Number(card.querySelector(".price").value) || 0);
-    const billing = card.querySelector(".billing").value;
-    const delay = Math.min(60, Math.max(0,
-      Math.floor(Number(card.querySelector(".delay").value) || 0)));
-
-    const monthlyCost = billing === "annual" ? price / 12 : price;
-    const fiveYearCost = monthlyCost * 60;
-    const extraCost = monthlyCost * delay;
-
-    card.querySelector(".extra-cost").value = money(extraCost);
-
-    monthlyTotal += monthlyCost;
-    delayTotal += extraCost;
-
-    entries.push({
-      name,
-      cost: fiveYearCost + extraCost
-    });
-  });
-
-  const annualTotal = monthlyTotal * 12;
-  const fiveYearTotal = monthlyTotal * 60 + delayTotal;
-
-  document.getElementById("fiveYear").textContent = money(fiveYearTotal);
-  document.getElementById("monthly").textContent = money(monthlyTotal);
-  document.getElementById("annual").textContent = money(annualTotal);
-  document.getElementById("leak").textContent = money(delayTotal);
-  document.getElementById("count").textContent = cards.length;
-
-  drawPie(entries);
+function formatCompact(value){
+ return new Intl.NumberFormat(undefined,{maximumFractionDigits:0}).format(value);
 }
-
-function drawPie(entries) {
-  const pie = document.getElementById("pie");
-  const legend = document.getElementById("legend");
-  const total = entries.reduce((sum, item) => sum + item.cost, 0);
-
-  if (!entries.length || total <= 0) {
-    pie.style.background = "conic-gradient(#303545 0deg 360deg)";
-    legend.innerHTML = '<div class="empty">Add subscription prices to see your breakdown.</div>';
-    return;
-  }
-
-  let angle = 0;
-  const slices = [];
-  const fragments = [];
-
-  entries.forEach((item, index) => {
-    if (item.cost <= 0) return;
-    const start = angle;
-    angle += item.cost / total * 360;
-    slices.push(`${colors[index % colors.length]} ${start}deg ${angle}deg`);
-
-    const percentage = (item.cost / total * 100).toFixed(1);
-    fragments.push(`
-      <div class="legend-item">
-        <span class="legend-name">
-          <span class="dot" style="background:${colors[index % colors.length]}"></span>
-          ${escapeAttr(item.name)}
-        </span>
-        <span>${money(item.cost)} · ${percentage}%</span>
-      </div>
-    `);
-  });
-
-  pie.style.background = `conic-gradient(${slices.join(",")})`;
-  legend.innerHTML = fragments.join("") || '<div class="empty">No costs to display.</div>';
+function drawPie(entries){
+ const pie=document.getElementById("pie");
+ const legend=document.getElementById("legend");
+ const total=entries.reduce((s,e)=>s+e.cost,0);
+ if(!entries.length||total<=0){
+  pie.style.background="conic-gradient(#303545 0deg 360deg)";
+  legend.innerHTML='<div class="empty">Add subscription prices to see your breakdown.</div>';
+  return;
+ }
+ let angle=0;const slices=[];
+ legend.innerHTML="";
+ entries.forEach((item,i)=>{
+  if(item.cost<=0)return;
+  const start=angle;angle+=item.cost/total*360;
+  slices.push(`${colors[i%colors.length]} ${start}deg ${angle}deg`);
+  const row=document.createElement("div");
+  row.className="legend-item";
+  const name=document.createElement("span");
+  name.className="legend-name";
+  const dot=document.createElement("span");
+  dot.className="dot";dot.style.background=colors[i%colors.length];
+  name.append(dot,document.createTextNode(item.name));
+  const amount=document.createElement("span");
+  amount.textContent=money(item.cost)+" · "+(item.cost/total*100).toFixed(1)+"%";
+  row.append(name,amount);legend.append(row);
+ });
+ pie.style.background=`conic-gradient(${slices.join(",")})`;
 }
-
-document.getElementById("addButton").addEventListener("click", () => {
-  addSubscription();
-});
-
-document.getElementById("calculateButton").addEventListener("click", () => {
-  calculate();
-  document.getElementById("fiveYear").scrollIntoView({
-    behavior:"smooth",
-    block:"center"
-  });
-});
-
-currencySelect.addEventListener("change", calculate);
-
-// Start with three editable example subscriptions.
-addSubscription("Streaming", 15, "monthly", 0);
-addSubscription("Music", 10, "monthly", 0);
-addSubscription("Software", 20, "monthly", 0);
+function renderPurchase(total){
+ const rate=fx[currencySelect.value]||1;
+ const usd=total/rate;
+ const max=100000;
+ const bounded=Math.min(usd,max);
+ let index=tiers.findIndex(t=>usd>=t.min&&usd<t.max);
+ if(index<0)index=usd>=max?tiers.length-1:0;
+ const tier=tiers[index];
+ const rangeMin=tier.min*rate,rangeMax=tier.max*rate;
+ const progress=tier.max===tier.min?100:Math.max(0,Math.min(100,(usd-tier.min)/(tier.max-tier.min)*100));
+ document.getElementById("buyTotal").textContent=money(total);
+ document.getElementById("buyDescription").textContent=
+  total<=0?"Add subscriptions to discover what your five-year spending could buy.":
+  "Your projected five-year subscription spending could instead go toward purchases like these.";
+ document.getElementById("progressFill").style.width=progress+"%";
+ document.getElementById("lowerLabel").textContent=money(rangeMin);
+ document.getElementById("upperLabel").textContent=money(rangeMax);
+ document.getElementById("tierTag").textContent=usd>=max?"TOP SPENDING RANGE":"YOUR SPENDING RANGE";
+ document.getElementById("tierTitle").textContent=total<=0?"Add your subscriptions":tier.title;
+ document.getElementById("tierRange").textContent=
+  `${money(rangeMin)} – ${money(rangeMax)} equivalent range`;
+ const examples=document.getElementById("buyExamples");
+ examples.innerHTML="";
+ tier.items.forEach(([emoji,desc])=>{
+  const item=document.createElement("div");
+  item.className="buy-example";
+  const icon=document.createElement("span");icon.textContent=emoji;
+  const text=document.createElement("div");text.textContent=desc;
+  item.append(icon,text);examples.append(item);
+ });
+ let nextText="";
+ if(usd>=max){
+  nextText="You've reached the top of this calculator's comparison scale: $100,000 USD equivalent.";
+ }else{
+  const remaining=Math.max(0,(tier.max-usd)*rate);
+  nextText=`Another ${money(remaining)} in projected spending would put you into the next comparison range.`;
+ }
+ document.getElementById("nextTier").textContent=total>0?nextText:"Your next spending range will appear here.";
+ const list=document.getElementById("rangeList");
+ list.innerHTML="";
+ tiers.forEach((t,i)=>{
+  const row=document.createElement("div");
+  row.className="range-row"+(i===index&&total>0?" active":"");
+  const left=document.createElement("span");
+  left.textContent=money(t.min*rate)+" – "+money(t.max*rate);
+  const right=document.createElement("strong");
+  right.textContent=t.max===100000?"TOP":"RANGE "+(i+1);
+  row.append(left,right);list.append(row);
+ });
+}
+function calculate(){
+ const cards=[...container.querySelectorAll(".subscription")];
+ const entries=[];let monthly=0,delayTotal=0;
+ cards.forEach((card,i)=>{
+  const name=card.querySelector(".service-name").value.trim()||`Subscription ${i+1}`;
+  const price=Math.max(0,Number(card.querySelector(".price").value)||0);
+  const billing=card.querySelector(".billing").value;
+  const delay=Math.min(60,Math.max(0,Math.floor(Number(card.querySelector(".delay").value)||0)));
+  const monthlyCost=billing==="annual"?price/12:price;
+  const extra=monthlyCost*delay;
+  card.querySelector(".extra-cost").value=money(extra);
+  monthly+=monthlyCost;delayTotal+=extra;
+  entries.push({name,cost:monthlyCost*60+extra});
+ });
+ const annual=monthly*12;
+ const total=monthly*60+delayTotal;
+ document.getElementById("fiveYear").textContent=money(total);
+ document.getElementById("monthly").textContent=money(monthly);
+ document.getElementById("annual").textContent=money(annual);
+ document.getElementById("leak").textContent=money(delayTotal);
+ document.getElementById("count").textContent=cards.length;
+ drawPie(entries);
+ renderPurchase(total);
+}
+document.getElementById("addButton").onclick=()=>addSubscription();
+document.getElementById("calculateButton").onclick=()=>{
+ calculate();
+ document.getElementById("fiveYear").scrollIntoView({behavior:"smooth",block:"center"});
+};
+currencySelect.addEventListener("change",calculate);
+addSubscription("Streaming",15,"monthly",0);
+addSubscription("Music",10,"monthly",0);
+addSubscription("Software",20,"monthly",0);
 </script>
 </body>
 </html>
