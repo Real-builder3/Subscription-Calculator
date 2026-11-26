@@ -2,146 +2,96 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>QuietCost Motion Studio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuietCost — 5-Year Subscription Leak Calculator</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
-  body { background: #07090E; color: #F8FAFC; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
-  /* 9:16 Vertical Stage */
-  #stage {
-    width: 405px; height: 720px; background: radial-gradient(circle at top, #131B2E 0%, #07090E 75%);
-    border: 1px solid #1E293B; border-radius: 20px; position: relative; overflow: hidden;
-    display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 28px;
-    box-shadow: 0 25px 60px rgba(0,0,0,0.85);
-  }
-  .grid-bg {
-    position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 32px 32px; pointer-events: none;
-  }
-  .scene { display: none; width: 100%; text-align: center; z-index: 2; animation: popIn 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
-  .scene.active { display: flex; flex-direction: column; align-items: center; gap: 18px; }
-  @keyframes popIn { from { opacity: 0; transform: scale(0.92) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+  body { background: #07090E; color: #F8FAFC; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+  .wrap { width: 100%; max-width: 460px; background: #0F172A; border: 1px solid #1E293B; border-radius: 20px; padding: 26px; box-shadow: 0 25px 60px rgba(0,0,0,0.8); }
+  .brand { font-size: 11px; font-weight: 800; letter-spacing: 2.5px; color: #22D3EE; text-transform: uppercase; margin-bottom: 6px; }
+  h1 { font-size: 24px; font-weight: 900; line-height: 1.2; margin-bottom: 6px; }
+  .sub { font-size: 13px; color: #94A3B8; margin-bottom: 22px; }
   
-  .badge { background: rgba(239, 68, 68, 0.15); border: 1px solid #EF4444; color: #FCA5A5; padding: 6px 14px; border-radius: 99px; font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; }
-  .badge.green { background: rgba(16, 185, 129, 0.15); border-color: #10B981; color: #6EE7B7; }
-  h1 { font-size: 32px; font-weight: 900; line-height: 1.15; letter-spacing: -0.5px; }
-  .red { color: #EF4444; text-shadow: 0 0 24px rgba(239,68,68,0.45); }
-  .green-txt { color: #10B981; text-shadow: 0 0 24px rgba(16,185,129,0.45); }
+  .control { margin-bottom: 18px; }
+  .row { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+  .val { color: #22D3EE; font-weight: 800; }
+  input[type=range] { width: 100%; accent-color: #EF4444; cursor: pointer; height: 6px; background: #1E293B; border-radius: 6px; }
   
-  /* UI Mockup Cards */
-  .card { width: 100%; background: #0F172A; border: 1px solid #1E293B; border-radius: 16px; padding: 20px; text-align: left; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-  .btn-big { width: 100%; padding: 16px; border-radius: 12px; font-size: 16px; font-weight: 800; text-align: center; margin-top: 12px; border: none; }
-  .btn-green { background: #10B981; color: #022C22; box-shadow: 0 0 25px rgba(16,185,129,0.5); }
-  .btn-red { background: #EF4444; color: #fff; }
-  .tiny-cancel { font-size: 10px; color: #475569; text-align: center; margin-top: 14px; text-decoration: underline; opacity: 0.65; }
-  
-  /* Maze Steps */
-  .step-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: #1E293B; border-radius: 10px; margin-bottom: 8px; font-size: 13px; border-left: 3px solid #EF4444; }
-  .big-stat { font-size: 54px; font-weight: 900; letter-spacing: -2px; }
-  
-  /* Controls Bar (Keep outside OBS crop area) */
-  #controls { position: fixed; bottom: 14px; display: flex; gap: 8px; background: #0F172A; padding: 8px 14px; border-radius: 12px; border: 1px solid #334155; }
-  #controls button { background: #1E293B; color: #E2E8F0; border: 1px solid #334155; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; }
-  #controls button.curr { background: #EF4444; border-color: #EF4444; color: white; }
+  .result-box { background: radial-gradient(circle at top, #291118 0%, #0B0F19 85%); border: 1px solid rgba(239,68,68,0.45); border-radius: 16px; padding: 20px; text-align: center; margin-top: 10px; }
+  .res-label { font-size: 11px; letter-spacing: 1.5px; color: #FCA5A5; font-weight: 700; text-transform: uppercase; }
+  .res-num { font-size: 46px; font-weight: 900; color: #EF4444; text-shadow: 0 0 24px rgba(239,68,68,0.45); margin: 4px 0; }
+  .res-opp { font-size: 12px; color: #CBD5E1; margin-top: 6px; }
+  .res-opp span { color: #10B981; font-weight: 700; }
+
+  /* Monetization / Affiliate Action Box */
+  .cta-box { margin-top: 18px; background: #131C31; border: 1px solid #334155; border-radius: 14px; padding: 16px; text-align: center; }
+  .cta-title { font-size: 13px; font-weight: 700; color: #F8FAFC; margin-bottom: 4px; }
+  .cta-desc { font-size: 12px; color: #94A3B8; margin-bottom: 12px; }
+  .cta-btn { display: block; width: 100%; padding: 13px; background: #EF4444; color: #fff; font-weight: 800; font-size: 14px; border-radius: 10px; text-decoration: none; box-shadow: 0 0 20px rgba(239,68,68,0.4); }
+  .cta-btn:hover { background: #DC2626; }
+  .foot { text-align: center; font-size: 11px; color: #475569; margin-top: 16px; letter-spacing: 1.5px; }
 </style>
 </head>
 <body>
 
-<div id="stage">
-  <div class="grid-bg"></div>
+<div class="wrap">
+  <div class="brand">QUIETCOST FORENSIC TOOL</div>
+  <h1>5-Year Subscription Leak</h1>
+  <p class="sub">See what "small" recurring charges quietly cost you over 60 months.</p>
 
-  <!-- SCENE 1: 0:00 - 0:04 (HOOK) -->
-  <div class="scene active" id="s1">
-    <div class="badge">UX DARK PATTERN #01</div>
-    <h1>THE <span class="red">"ROACH MOTEL"</span> TRAP</h1>
-    <div class="card" style="text-align:center;">
-      <div style="font-size:13px; color:#94A3B8;">AVERAGE HIDDEN SUBSCRIPTION DRAIN</div>
-      <div class="big-stat red" id="drainCounter">$0</div>
-      <div style="font-size:12px; color:#64748B;">PER YEAR IN FORGOTTEN TRIALS</div>
-    </div>
+  <div class="control">
+    <div class="row"><span>Active Subscriptions & Trials</span><span class="val" id="countVal">4 apps</span></div>
+    <input type="range" id="count" min="1" max="15" value="4" oninput="calc()">
   </div>
 
-  <!-- SCENE 2: 0:04 - 0:11 (1-CLICK ENTRY) -->
-  <div class="scene" id="s2">
-    <div class="badge green">STEP 1: SIGNING UP</div>
-    <h1>ENTRY: <span class="green-txt">1 CLICK</span></h1>
-    <div class="card">
-      <div style="font-size:14px; font-weight:700;">Pro Membership Trial</div>
-      <div style="font-size:12px; color:#94A3B8; margin-top:4px;">$0.00 due today • Instant access</div>
-      <div class="btn-big btn-green">START FREE TRIAL →</div>
-    </div>
-    <div style="font-size:14px; color:#6EE7B7; font-weight:700;">✓ COMPLETED IN 2.4 SECONDS</div>
+  <div class="control">
+    <div class="row"><span>Average Monthly Charge per App</span><span class="val" id="priceVal">$14.99 / mo</span></div>
+    <input type="range" id="price" min="3" max="50" step="0.5" value="15" oninput="calc()">
   </div>
 
-  <!-- SCENE 3: 0:11 - 0:21 (THE CANCELLATION MAZE) -->
-  <div class="scene" id="s3">
-    <div class="badge">STEP 2: TRYING TO LEAVE</div>
-    <h1>EXIT: <span class="red">7-SCREEN MAZE</span></h1>
-    <div class="card">
-      <div class="step-row"><span>1. Account → Settings → Billing</span><span class="red">HIDDEN</span></div>
-      <div class="step-row"><span>2. "Wait! Take 50% OFF!"</span><span class="red">POP-UP</span></div>
-      <div class="step-row"><span>3. "You'll lose all streaks!"</span><span class="red">GUILT</span></div>
-      <div class="step-row"><span>4. Mandatory 5-question survey</span><span class="red">BLOCKED</span></div>
-      <div class="btn-big btn-red">KEEP MY BENEFITS</div>
-      <div class="tiny-cancel">continue to cancel subscription</div>
-    </div>
+  <div class="control">
+    <div class="row"><span>Annual Silent Price Hike</span><span class="val" id="hikeVal">8% / yr</span></div>
+    <input type="range" id="hike" min="0" max="20" value="8" oninput="calc()">
   </div>
 
-  <!-- SCENE 4: 0:21 - 0:32 (REGULATORY RECEIPTS) -->
-  <div class="scene" id="s4">
-    <div class="badge">FEDERAL ENFORCEMENT</div>
-    <h1>BILLIONS IN <span class="red">FINES</span></h1>
-    <div class="card" style="text-align:center;">
-      <div class="big-stat red">$2.5B+</div>
-      <div style="font-size:13px; color:#CBD5E1; margin-top:4px;">RECORD PENALTIES FOR OBSTRUCTIVE CANCELLATION FLOWS</div>
-    </div>
-    <div class="card" style="text-align:center;">
-      <div style="font-size:28px; font-weight:900; color:#FBBF24;">15% – 30%</div>
-      <div style="font-size:12px; color:#94A3B8;">USERS WHO GIVE UP & PAY ANOTHER MONTH</div>
-    </div>
+  <div class="result-box">
+    <div class="res-label">Total 5-Year Cash Drained</div>
+    <div class="res-num" id="totalLeak">$4,224</div>
+    <div class="res-opp">Invested at 8% return, that's <span id="oppCost">$5,140</span> lost wealth.</div>
   </div>
 
-  <!-- SCENE 5: 0:32 - 0:48 (5-YEAR LEAK + OUTRO) -->
-  <div class="scene" id="s5">
-    <div class="badge">THE QUIET COST</div>
-    <h1>CUSTOMER OR <span class="red">CAPTIVE?</span></h1>
-    <div class="card" style="text-align:center;">
-      <div style="font-size:12px; color:#94A3B8;">JUST ONE $19.99/MO APP OVER 5 YEARS</div>
-      <div class="big-stat red">$1,199.40</div>
-      <div style="font-size:12px; color:#FCA5A5;">TEST YOUR LEAK IN PINNED COMMENT ↓</div>
-    </div>
-    <div style="margin-top:8px;">
-      <div style="font-size:22px; font-weight:900; letter-spacing:1px;">QuietCost</div>
-      <div style="font-size:11px; color:#64748B; letter-spacing:3px; margin-top:2px;">QUESTION EVERYTHING.</div>
-    </div>
+  <!-- Replace href with your Rocket Money / Trim / Virtual Card affiliate link -->
+  <div class="cta-box">
+    <div class="cta-title">Block "Roach Motel" Renewals Automatically</div>
+    <div class="cta-desc">Use 1-click virtual burner cards so free trials can never charge you after day 7.</div>
+    <a href="#YOUR_AFFILIATE_LINK" target="_blank" rel="noopener" class="cta-btn">Get Free Virtual Burner Cards →</a>
   </div>
-</div>
 
-<div id="controls">
-  <button class="curr" onclick="go(1)">[1] Hook ($1K)</button>
-  <button onclick="go(2)">[2] 1-Click Entry</button>
-  <button onclick="go(3)">[3] 7-Screen Maze</button>
-  <button onclick="go(4)">[4] $2.5B Fines</button>
-  <button onclick="go(5)">[5] Captive + Outro</button>
+  <div class="foot">QUIETCOST • QUESTION EVERYTHING.</div>
 </div>
 
 <script>
-  function animateCounter(el, target) {
-    let cur = 0; const step = Math.ceil(target / 25);
-    const t = setInterval(() => {
-      cur += step;
-      if (cur >= target) { cur = target; clearInterval(t); }
-      el.textContent = '$' + cur.toLocaleString();
-    }, 25);
+  function calc() {
+    const count = Number(document.getElementById('count').value);
+    const price = Number(document.getElementById('price').value);
+    const hike = Number(document.getElementById('hike').value) / 100;
+
+    document.getElementById('countVal').textContent = count + (count === 1 ? ' app' : ' apps');
+    document.getElementById('priceVal').textContent = '$' + price.toFixed(2) + ' / mo';
+    document.getElementById('hikeVal').textContent = (hike * 100).toFixed(0) + '% / yr';
+
+    let total = 0;
+    let monthly = count * price;
+    for (let yr = 0; yr < 5; yr++) {
+      total += monthly * 12;
+      monthly *= (1 + hike);
+    }
+    const invested = total * 1.216; // approx 8% compound growth over 5 yrs
+
+    document.getElementById('totalLeak').textContent = '$' + Math.round(total).toLocaleString();
+    document.getElementById('oppCost').textContent = '$' + Math.round(invested).toLocaleString();
   }
-  function go(n) {
-    document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('#controls button').forEach(b => b.classList.remove('curr'));
-    document.getElementById('s' + n).classList.add('active');
-    document.querySelectorAll('#controls button')[n - 1].classList.add('curr');
-    if (n === 1) animateCounter(document.getElementById('drainCounter'), 1080);
-  }
-  document.addEventListener('keydown', e => { if (['1','2','3','4','5'].includes(e.key)) go(Number(e.key)); });
-  animateCounter(document.getElementById('drainCounter'), 1080);
+  calc();
 </script>
 </body>
 </html>
